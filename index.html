@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>天气预报</title>
+    <style>
+        .list-item {
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .list-enter-active, .list-leave-active {
+            transition: all 1s;
+        }
+        .list-enter, .list-leave-to
+            /* .list-leave-active for below version 2.1.8 */ {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+        body{
+            background-color: skyblue;
+        }
+        h3,#app{
+            width: 500px;
+            margin: 0 auto;
+            text-align: center;
+            padding-top: 30px;
+        }
+        #app input{
+            width: 300px;
+            height: 30px;
+            outline: 0;
+            border-radius: 10px;
+            border: 1px solid green;
+            padding-left: 10px
+        }
+         ul{
+            list-style: none;
+            padding: 0; 
+        
+           
+        } 
+        li{
+            width: 320px;
+            height:30px;
+            border-radius: 10px;
+            border: 1px solid green;
+            margin: 10px auto;
+            line-height: 30px;
+            text-align: center;
+        }
+        [v-cloak]{
+            display: none;
+        } 
+            
+    </style>
+</head>
+
+<body>
+    <h3>天气查查查</h3>
+    <!-- 调用组件 -->
+    <div id="app">
+        <weather-counter></weather-counter>
+    </div>
+</body>
+
+</html>
+<!-- 引入Vue -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<!-- 引入resourc文件 依赖于Vues使用 -->
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+<!-- 组件模板 -->
+<script id='weather' type="text/html">
+    <div class="weather">
+        <input type="text" placeholder="请输入城市名称" @keyup.enter='search' v-model="valueList" > 
+        <transition-group name = 'list' tag = 'ul'>
+            <li v-for="(item, index) in weatherList" :key="index" v-cloak>
+                {{item.date}};{{item.high}};{{item.low}};{{item.fengxiang}}
+            </li>
+        </transition-group>
+  </div>
+</script>
+<script>    
+    // 实力一个组件
+    Vue.component('weather-counter', {
+        //模板
+        template: "#weather",
+        //数据
+        data: function () {
+            return {
+                //输入城市
+                valueList: '',
+                //保持天气数据
+                weatherList: []
+            }
+        },
+        methods: {
+            search() {
+                //清空上一次结果,不然没有动画效果
+                this.weatherList = []
+                //发送resource请求
+                this.$http.get('http://wthrcdn.etouch.cn/weather_mini?city=' + this.valueList).then(response => {
+                    //console.log(response);
+                    // 保存数据
+                    if (response.body.desc == 'OK') {
+                        //返回值渲染到页面
+                        this.weatherList = response.body.data.forecast
+                    } else {
+                        alert('输入的城市有误,请重新输入')
+                    }
+                })
+            }
+        }
+    })
+    //实例化一个Vue
+    let app = new Vue({
+        el: '#app'
+    })
+</script>
